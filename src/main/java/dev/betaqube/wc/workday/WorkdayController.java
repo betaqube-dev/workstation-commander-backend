@@ -17,12 +17,8 @@ public class WorkdayController {
     }
 
     @GetMapping("/today")
-    public ResponseEntity<WorkdayDto> getToday() {
-        Workday workday = workdayService.getToday();
-        if (workday == null) {
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.ok(WorkdayDto.fromEntity(workday));
+    public ResponseEntity<WorkdayStatusDto> getToday() {
+        return ResponseEntity.ok(workdayService.getStatus());
     }
 
     @PostMapping("/start")
@@ -44,8 +40,8 @@ public class WorkdayController {
     }
 
     @PostMapping("/end")
-    public ResponseEntity<WorkdayDto> endDay() {
-        Workday workday = workdayService.endDay();
-        return ResponseEntity.ok(WorkdayDto.fromEntity(workday));
-    }
+	public ResponseEntity<WorkdayDto> endDay() {
+		Workday workday = workdayService.endDay();
+		return ResponseEntity.ok(WorkdayDto.fromEntity(workday));
+	}
 }
