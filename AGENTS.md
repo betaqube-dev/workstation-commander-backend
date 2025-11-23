@@ -29,6 +29,7 @@ This repository is a Spring Boot 3.5.8 service targeting Java 21. Keep changes s
 ## Commit & Pull Request Guidelines
 - Git metadata is not bundled here; if using Git, keep commit subjects imperative and concise (e.g., `Add workstation bootstrap endpoint`). Conventional Commits (`feat:`, `fix:`, etc.) are welcome for clarity.
 - PRs should include a short summary, linked issue/ticket, test evidence (command output or notes), and any configuration or migration steps. Add screenshots or sample requests/responses if behavior changes.
+- Only create commits when explicitly requested.
 
 ## Security & Configuration Tips
 - Do not commit secrets or tokens; prefer environment variables or an untracked `application-*.yaml`.
