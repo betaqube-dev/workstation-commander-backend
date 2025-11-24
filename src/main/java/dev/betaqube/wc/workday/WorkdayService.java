@@ -2,6 +2,7 @@ package dev.betaqube.wc.workday;
 
 import dev.betaqube.wc.user.AppUser;
 import dev.betaqube.wc.user.AppUserRepository;
+import dev.betaqube.wc.configparam.SystemParameterService;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -19,12 +20,19 @@ public class WorkdayService {
 	private final WorkdayRepository workdayRepository;
 	private final AppUserRepository appUserRepository;
 	private final WorkdayMessagesProperties messages;
+	private final SystemParameterService systemParameterService;
+
+	private static final String PARAM_WORK_START = "wc_work_start";
+	private static final String PARAM_LUNCH_PAUSE = "wc_lunch_pause";
+	private static final String PARAM_LUNCH_RETURN = "wc_lunch_return";
+	private static final String PARAM_WORK_END = "wc_work_end";
 
 	public WorkdayService(WorkdayRepository workdayRepository, AppUserRepository appUserRepository,
-			WorkdayMessagesProperties messages) {
+			WorkdayMessagesProperties messages, SystemParameterService systemParameterService) {
 		this.workdayRepository = workdayRepository;
 		this.appUserRepository = appUserRepository;
 		this.messages = messages;
+		this.systemParameterService = systemParameterService;
 	}
 
 	private AppUser getCurrentUser() {
@@ -99,10 +107,10 @@ public class WorkdayService {
 
 		List<String> alerts = new ArrayList<>();
 
-		LocalTime startRef = LocalTime.of(9, 0);
-		LocalTime lunchRef = LocalTime.of(12, 30);
-		LocalTime lunchReturnRef = LocalTime.of(13, 30);
-		LocalTime endRef = LocalTime.of(18, 0);
+		LocalTime startRef = readTimeParam(PARAM_WORK_START, LocalTime.of(9, 0));
+		LocalTime lunchRef = readTimeParam(PARAM_LUNCH_PAUSE, LocalTime.of(12, 30));
+		LocalTime lunchReturnRef = readTimeParam(PARAM_LUNCH_RETURN, LocalTime.of(13, 30));
+		LocalTime endRef = readTimeParam(PARAM_WORK_END, LocalTime.of(18, 0));
 
 		if (dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY) {
 			return WorkdayStatusDto.noSession(alerts);
@@ -138,5 +146,20 @@ public class WorkdayService {
 			throw new WorkdayOperationException(messages.getNotStarted());
 		}
 		return workday;
+	}
+
+	private LocalTime readTimeParam(String key, LocalTime defaultValue) {
+		try {
+			String value = systemParameterService.findByKey(key).getValue();
+			String padded = value.length() == 3 ? "0" + value : value;
+			if (padded.length() != 4) {
+				return defaultValue;
+			}
+			int hours = Integer.parseInt(padded.substring(0, 2));
+			int minutes = Integer.parseInt(padded.substring(2, 4));
+			return LocalTime.of(hours, minutes);
+		} catch (Exception ex) {
+			return defaultValue;
+		}
 	}
 }
