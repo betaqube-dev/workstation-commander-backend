@@ -1,9 +1,12 @@
 package dev.betaqube.wc.user;
 
 import dev.betaqube.wc.user.dto.AppUserDto;
+import dev.betaqube.wc.user.dto.ChangePasswordRequest;
 import dev.betaqube.wc.user.dto.CreateUserRequest;
 import dev.betaqube.wc.user.dto.UpdateUserRequest;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -80,9 +83,24 @@ public class AppUserService {
 		appUserRepository.delete(user);
 	}
 
+	public void changePassword(ChangePasswordRequest request) {
+		AppUser user = getCurrentUser();
+		if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+			throw new IllegalStateException("Senha atual incorreta.");
+		}
+		user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+		appUserRepository.save(user);
+	}
+
 	private void ensureNotAdmin(AppUser user) {
 		if (ROLE_ADMIN.equalsIgnoreCase(user.getRole())) {
 			throw new IllegalStateException("Operação não permitida para usuários ADMIN.");
 		}
+	}
+
+	private AppUser getCurrentUser() {
+		String email = SecurityContextHolder.getContext().getAuthentication().getName();
+		return appUserRepository.findByEmail(email)
+				.orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado: " + email));
 	}
 }

@@ -89,6 +89,10 @@ public class WorkdayService {
 
 	public WorkdayStatusDto getStatus() {
 		AppUser user = getCurrentUser();
+		return getStatusForUser(user);
+	}
+
+	public WorkdayStatusDto getStatusForUser(AppUser user) {
 		LocalDate today = LocalDate.now();
 		LocalTime now = LocalTime.now();
 		DayOfWeek dayOfWeek = today.getDayOfWeek();

@@ -1,0 +1,9 @@
+package dev.betaqube.wc.configparam;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.Optional;
+
+public interface SystemParameterRepository extends JpaRepository<SystemParameter, Long> {
+	Optional<SystemParameter> findByKey(String key);
+}
