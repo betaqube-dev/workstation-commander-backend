@@ -18,16 +18,19 @@ public class WorkdayService {
 
 	private final WorkdayRepository workdayRepository;
 	private final AppUserRepository appUserRepository;
+	private final WorkdayMessagesProperties messages;
 
-	public WorkdayService(WorkdayRepository workdayRepository, AppUserRepository appUserRepository) {
+	public WorkdayService(WorkdayRepository workdayRepository, AppUserRepository appUserRepository,
+			WorkdayMessagesProperties messages) {
 		this.workdayRepository = workdayRepository;
 		this.appUserRepository = appUserRepository;
+		this.messages = messages;
 	}
 
 	private AppUser getCurrentUser() {
-		String username = SecurityContextHolder.getContext().getAuthentication().getName();
-		return appUserRepository.findByUsername(username)
-				.orElseThrow(() -> new UsernameNotFoundException("Usuario nao encontrado"));
+		String email = SecurityContextHolder.getContext().getAuthentication().getName();
+		return appUserRepository.findByEmail(email)
+				.orElseThrow(() -> new UsernameNotFoundException(messages.getUserNotFound()));
 	}
 
 	public Workday getToday() {
@@ -40,10 +43,10 @@ public class WorkdayService {
 		LocalDate today = LocalDate.now();
 		DayOfWeek dayOfWeek = today.getDayOfWeek();
 		if (dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY) {
-			throw new WorkdayOperationException("Nao e dia util para iniciar o trabalho");
+			throw new WorkdayOperationException(messages.getWeekendStart());
 		}
 		workdayRepository.findByUserAndDate(user, today).ifPresent(existing -> {
-			throw new WorkdayOperationException("Workday ja iniciado");
+			throw new WorkdayOperationException(messages.getAlreadyStarted());
 		});
 
 		Workday workday = new Workday(user, today, WorkdayState.WORKING);
@@ -54,10 +57,10 @@ public class WorkdayService {
 	public Workday pauseLunch() {
 		Workday workday = getRequiredToday();
 		if (workday.getState() != WorkdayState.WORKING) {
-			throw new WorkdayOperationException("Workday nao esta em andamento");
+			throw new WorkdayOperationException(messages.getNotInProgress());
 		}
 		if (workday.getLunchStartTime() != null) {
-			throw new WorkdayOperationException("Pausa de almoco ja registrada para hoje");
+			throw new WorkdayOperationException(messages.getLunchAlreadyMarked());
 		}
 		workday.setLunchStartTime(LocalDateTime.now());
 		workday.setState(WorkdayState.LUNCH_BREAK);
@@ -67,7 +70,7 @@ public class WorkdayService {
 	public Workday returnFromLunch() {
 		Workday workday = getRequiredToday();
 		if (workday.getState() != WorkdayState.LUNCH_BREAK) {
-			throw new WorkdayOperationException("Workday nao esta em pausa de almoco");
+			throw new WorkdayOperationException(messages.getNotOnLunch());
 		}
 		workday.setLunchEndTime(LocalDateTime.now());
 		workday.setState(WorkdayState.WORKING);
@@ -77,7 +80,7 @@ public class WorkdayService {
 	public Workday endDay() {
 		Workday workday = getRequiredToday();
 		if (workday.getState() == WorkdayState.ENDED) {
-			throw new WorkdayOperationException("Workday ja encerrado");
+			throw new WorkdayOperationException(messages.getAlreadyEnded());
 		}
 		workday.setEndTime(LocalDateTime.now());
 		workday.setState(WorkdayState.ENDED);
@@ -95,7 +98,7 @@ public class WorkdayService {
 		LocalTime startRef = LocalTime.of(9, 0);
 		LocalTime lunchRef = LocalTime.of(12, 30);
 		LocalTime lunchReturnRef = LocalTime.of(13, 30);
-		LocalTime endRef = LocalTime.of(14, 0);
+		LocalTime endRef = LocalTime.of(18, 0);
 
 		if (dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY) {
 			return WorkdayStatusDto.noSession(alerts);
@@ -104,21 +107,21 @@ public class WorkdayService {
 		Workday workday = workdayRepository.findByUserAndDate(user, today).orElse(null);
 		if (workday == null) {
 			if (now.isAfter(startRef)) {
-				alerts.add("E ai, nao vai trabalhar?");
+				alerts.add(messages.getAlertNoSessionAfterStart());
 			}
 			return WorkdayStatusDto.noSession(alerts);
 		}
 
 		if (workday.getState() == WorkdayState.WORKING) {
 			if (workday.getLunchStartTime() == null && now.isAfter(lunchRef)) {
-				alerts.add("Voce ainda nao marcou pausa para almoco.");
+				alerts.add(messages.getAlertMissingLunch());
 			}
 			if (now.isAfter(endRef) && workday.getEndTime() == null) {
-				alerts.add("Seu expediente ja passou das 18h, deseja encerrar o dia?");
+				alerts.add(messages.getAlertPastEnd());
 			}
 		} else if (workday.getState() == WorkdayState.LUNCH_BREAK) {
 			if (now.isAfter(lunchReturnRef)) {
-				alerts.add("Vai voltar do almoco?");
+				alerts.add(messages.getAlertReturnFromLunch());
 			}
 		}
 
@@ -128,7 +131,7 @@ public class WorkdayService {
 	private Workday getRequiredToday() {
 		Workday workday = getToday();
 		if (workday == null) {
-			throw new WorkdayOperationException("Workday ainda nao iniciado");
+			throw new WorkdayOperationException(messages.getNotStarted());
 		}
 		return workday;
 	}

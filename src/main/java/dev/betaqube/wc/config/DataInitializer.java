@@ -12,8 +12,8 @@ public class DataInitializer {
 
 	@Bean
 	CommandLineRunner seedDefaultUser(AppUserRepository repository, PasswordEncoder passwordEncoder) {
-		return args -> repository.findByUsername("admin").orElseGet(() -> {
-			AppUser user = new AppUser("admin", passwordEncoder.encode("password"), "ROLE_ADMIN");
+		return args -> repository.findByEmail("admin@wc.local").orElseGet(() -> {
+			AppUser user = new AppUser("admin@wc.local", "Administrador", passwordEncoder.encode("password"), "ROLE_ADMIN");
 			return repository.save(user);
 		});
 	}

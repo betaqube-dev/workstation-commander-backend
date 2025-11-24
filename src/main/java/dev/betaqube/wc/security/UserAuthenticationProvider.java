@@ -21,10 +21,10 @@ public class UserAuthenticationProvider implements AuthenticationProvider {
 
 	@Override
 	public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-		String username = authentication.getName();
+		String email = authentication.getName();
 		String rawPassword = (String) authentication.getCredentials();
 
-		UserDetails user = userDetailsService.loadUserByUsername(username);
+		UserDetails user = userDetailsService.loadUserByUsername(email);
 		if (!passwordEncoder.matches(rawPassword, user.getPassword())) {
 			throw new BadCredentialsException("Invalid credentials");
 		}

@@ -27,7 +27,7 @@ This repository is a Spring Boot 3.5.8 service targeting Java 21. Keep changes s
 - Run `./mvnw test` before pushing; add assertions around expected responses, HTTP status codes, and error paths when endpoints are introduced.
 
 ## Commit & Pull Request Guidelines
-- Git metadata is not bundled here; if using Git, keep commit subjects imperative and concise (e.g., `Add workstation bootstrap endpoint`). Conventional Commits (`feat:`, `fix:`, etc.) are welcome for clarity.
+- Git metadata is not bundled here; if using Git, keep commit subjects imperative and concise (e.g., `Add workstation bootstrap endpoint`). Always use Conventional Commits (`feat:`, `fix:`, etc.) for clarity.
 - PRs should include a short summary, linked issue/ticket, test evidence (command output or notes), and any configuration or migration steps. Add screenshots or sample requests/responses if behavior changes.
 - Only create commits when explicitly requested.
 

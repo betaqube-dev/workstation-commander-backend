@@ -30,14 +30,14 @@ public class AuthController {
 	@PostMapping("/login")
 	public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest request) {
 		Authentication authentication = authenticationManager.authenticate(
-				new UsernamePasswordAuthenticationToken(request.username(), request.password())
+				new UsernamePasswordAuthenticationToken(request.email(), request.password())
 		);
 
 		if (!authentication.isAuthenticated()) {
 			throw new UsernameNotFoundException("Authentication failed");
 		}
 
-		AppUser user = userRepository.findByUsername(request.username())
+		AppUser user = userRepository.findByEmail(request.email())
 				.orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
 		String token = jwtService.generateToken(user);
