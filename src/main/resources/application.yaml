@@ -21,3 +21,17 @@ security:
   jwt:
     secret: change-this-secret-in-prod-please-32bytes
     expiration: 3600000 # milliseconds
+workday:
+  messages:
+    weekend-start: "Ta querendo trabalhar no final de semana? Volte segunda-feira (se não for feriado)!"
+    already-started: "Workday ja iniciado"
+    not-in-progress: "Workday nao esta em andamento"
+    lunch-already-marked: "Pausa de almoco ja registrada para hoje"
+    not-on-lunch: "Workday nao esta em pausa de almoco"
+    already-ended: "Workday ja encerrado"
+    not-started: "Workday ainda nao iniciado"
+    user-not-found: "Usuario nao encontrado"
+    alert-no-session-after-start: "Já passou das 9h! E ai, nao vai trabalhar?"
+    alert-missing-lunch: "Voce ainda nao marcou pausa para almoco."
+    alert-past-end: "Seu expediente ja passou das 18h, deseja encerrar o dia?"
+    alert-return-from-lunch: "Vai voltar do almoco?"
