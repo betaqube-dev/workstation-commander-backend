@@ -8,6 +8,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.Principal;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.Base64;
@@ -70,7 +71,7 @@ public class ApiKeyService {
 
 	private AppUser getCurrentUser() {
 		String email = Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication())
-				.map(auth -> auth.getName())
+				.map(Principal::getName)
 				.orElseThrow(() -> new UsernameNotFoundException("Usuário não autenticado."));
 
 		return appUserRepository.findByEmail(email)

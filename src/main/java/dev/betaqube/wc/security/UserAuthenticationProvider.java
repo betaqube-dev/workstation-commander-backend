@@ -9,31 +9,24 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-public class UserAuthenticationProvider implements AuthenticationProvider {
+public record UserAuthenticationProvider(UserDetailsService userDetailsService,
+                                         PasswordEncoder passwordEncoder) implements AuthenticationProvider {
 
-	private final UserDetailsService userDetailsService;
-	private final PasswordEncoder passwordEncoder;
+    @Override
+    public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+        String email = authentication.getName();
+        String rawPassword = (String) authentication.getCredentials();
 
-	public UserAuthenticationProvider(UserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
-		this.userDetailsService = userDetailsService;
-		this.passwordEncoder = passwordEncoder;
-	}
+        UserDetails user = userDetailsService.loadUserByUsername(email);
+        if (!passwordEncoder.matches(rawPassword, user.getPassword())) {
+            throw new BadCredentialsException("Invalid credentials");
+        }
 
-	@Override
-	public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-		String email = authentication.getName();
-		String rawPassword = (String) authentication.getCredentials();
+        return UsernamePasswordAuthenticationToken.authenticated(user, null, user.getAuthorities());
+    }
 
-		UserDetails user = userDetailsService.loadUserByUsername(email);
-		if (!passwordEncoder.matches(rawPassword, user.getPassword())) {
-			throw new BadCredentialsException("Invalid credentials");
-		}
-
-		return UsernamePasswordAuthenticationToken.authenticated(user, null, user.getAuthorities());
-	}
-
-	@Override
-	public boolean supports(Class<?> authentication) {
-		return UsernamePasswordAuthenticationToken.class.isAssignableFrom(authentication);
-	}
+    @Override
+    public boolean supports(Class<?> authentication) {
+        return UsernamePasswordAuthenticationToken.class.isAssignableFrom(authentication);
+    }
 }

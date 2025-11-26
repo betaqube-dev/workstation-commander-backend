@@ -14,7 +14,8 @@ public class WorkdayStatusDto {
 	private LocalDateTime lunchStartTime;
 	private LocalDateTime lunchEndTime;
 	private LocalDateTime endTime;
-	private List<String> alerts = new ArrayList<>();
+
+	private final List<String> alerts = new ArrayList<>();
 
 	public String getState() {
 		return state;

@@ -44,7 +44,7 @@ public class SecurityConfig {
 				.csrf(AbstractHttpConfigurer::disable)
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authorizeHttpRequests(auth -> auth
-						.requestMatchers("/api/auth/**", "/h2-console/**").permitAll()
+						.requestMatchers("/api/auth/**", "/api/v1/public/**", "/h2-console/**").permitAll()
 						.anyRequest().authenticated()
 				)
 				.headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
